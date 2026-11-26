@@ -1,0 +1,25 @@
+# Byte-compiled / virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Secrets & local environment files
+.env
+.env.*
+!.env.example
+
+# OS & editor artifacts
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Optional local media outputs (uncomment if you don't want large .mp4/.png files tracked in Git)
+# examples/**/outputs/

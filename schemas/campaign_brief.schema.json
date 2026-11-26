@@ -1,0 +1,231 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/your-org/higgsfield-director-os/schemas/campaign_brief.schema.json",
+  "title": "Campaign Brief",
+  "description": "Human-authored input for a campaign: product, audience, visual tone, format, budget, and the shot scope the Ad Director compiles into a shot manifest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "campaign_id",
+    "brand",
+    "product",
+    "audience",
+    "tone",
+    "aspect_ratio",
+    "budget",
+    "anchor",
+    "shots"
+  ],
+  "properties": {
+    "campaign_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{1,63}$"
+    },
+    "brand": {
+      "type": "string",
+      "minLength": 1
+    },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "description"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identity_locks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Details that must never drift between shots (colors, materials, patterns)."
+        }
+      }
+    },
+    "audience": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "segments"
+      ],
+      "properties": {
+        "segments": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "tone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "vibe"
+      ],
+      "properties": {
+        "vibe": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lighting": {
+          "type": "string"
+        },
+        "camera": {
+          "type": "string"
+        },
+        "palette": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "aspect_ratio": {
+      "enum": [
+        "1:1",
+        "9:16",
+        "16:9",
+        "4:3",
+        "3:4",
+        "4:5",
+        "5:4",
+        "3:2",
+        "2:3",
+        "21:9"
+      ]
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cap_credits"
+      ],
+      "properties": {
+        "cap_credits": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "reserve_credits": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "silent_video": {
+          "type": "boolean",
+          "default": true
+        },
+        "no_text_in_frame": {
+          "type": "boolean",
+          "default": true
+        },
+        "avoid": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "shot_id",
+        "prompt",
+        "model_candidates"
+      ],
+      "properties": {
+        "shot_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_candidates": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "resolution": {
+          "type": "string"
+        },
+        "quality": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        }
+      }
+    },
+    "shots": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "shot_id",
+          "type",
+          "duration_seconds",
+          "prompt",
+          "model_candidates"
+        ],
+        "properties": {
+          "shot_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"
+          },
+          "type": {
+            "const": "video"
+          },
+          "duration_seconds": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "camera_motion": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 1
+          },
+          "model_candidates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "resolution": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

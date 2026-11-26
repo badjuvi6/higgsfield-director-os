@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/your-org/higgsfield-director-os/schemas/shot_manifest.schema.json",
+  "title": "Shot Manifest",
+  "description": "Source of truth for every planned and rendered asset in a campaign: model, aspect ratio, estimated vs actual credits, Higgsfield job id, and hosted URL.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["manifest_version", "campaign_id", "budget", "entries"],
+  "properties": {
+    "manifest_version": { "const": "1.0" },
+    "campaign_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{1,63}$" },
+    "brief_ref": { "type": "string", "description": "Relative path to the campaign brief this manifest was compiled from." },
+    "created_at": { "type": "string", "format": "date" },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cap_credits"],
+      "properties": {
+        "cap_credits": { "type": "number", "exclusiveMinimum": 0, "description": "Hard spending cap for this campaign." },
+        "reserve_credits": { "type": "number", "minimum": 0, "default": 0, "description": "Credits held back from planning (retry buffer)." },
+        "starting_balance": { "type": ["number", "null"], "minimum": 0, "description": "Account balance observed at planning time." }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "shot_id", "kind", "status", "model", "aspect_ratio", "prompt",
+        "estimated_credits", "actual_credits", "job_id", "hosted_url", "approved"
+      ],
+      "properties": {
+        "shot_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$" },
+        "kind": { "enum": ["anchor_image", "image", "video", "audio"] },
+        "status": { "enum": ["planned", "estimated", "approved", "rendering", "completed", "failed"] },
+        "model": { "type": "string", "minLength": 1, "description": "Higgsfield model id, e.g. gpt_image_2_6." },
+        "aspect_ratio": { "enum": ["1:1", "9:16", "16:9", "4:3", "3:4", "4:5", "5:4", "3:2", "2:3", "21:9"] },
+        "resolution": { "type": ["string", "null"], "description": "e.g. 1k, 480p, 720p." },
+        "duration_seconds": { "type": ["integer", "null"], "minimum": 1 },
+        "prompt": { "type": "string", "minLength": 1 },
+        "anchor_ref": { "type": ["string", "null"], "description": "shot_id of the anchor_image this video must start from." },
+        "estimated_credits": { "type": ["number", "null"], "minimum": 0 },
+        "actual_credits": { "type": ["number", "null"], "minimum": 0 },
+        "quote_ref": { "type": ["string", "null"] },
+        "approved": { "type": "boolean", "description": "True only after the user replied APPROVE for this exact row." },
+        "approved_at": { "type": ["string", "null"], "format": "date-time" },
+        "job_id": { "type": ["string", "null"] },
+        "hosted_url": { "type": ["string", "null"] },
+        "local_path": { "type": ["string", "null"] },
+        "completed_at": { "type": ["string", "null"], "format": "date-time" },
+        "notes": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "video" } }, "required": ["kind"] },
+          "then": {
+            "required": ["anchor_ref", "duration_seconds"],
+            "properties": {
+              "anchor_ref": { "type": "string", "minLength": 1 },
+              "duration_seconds": { "type": "integer", "minimum": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "enum": ["approved", "rendering", "completed", "failed"] } }, "required": ["status"] },
+          "then": {
+            "properties": {
+              "approved": { "const": true },
+              "estimated_credits": { "type": "number", "minimum": 0 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "completed" } }, "required": ["status"] },
+          "then": {
+            "properties": {
+              "job_id": { "type": "string", "minLength": 1 },
+              "hosted_url": { "type": "string", "pattern": "^https://" },
+              "actual_credits": { "type": "number", "minimum": 0 }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
