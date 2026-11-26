@@ -32,20 +32,17 @@ flowchart TD
     K --> L[manifest_logger.py log]
     L --> M[manifest_logger.py report / download]
     M --> N[download_assets.sh -> assets/]
-
 ```
 
 ## Repository layout
 
-```text
+```
 .claude/skills/ad-director/SKILL.md   Skill: the three rules + workflow
 schemas/campaign_brief.schema.json    Input schema (what the human writes)
 schemas/shot_manifest.schema.json     Output schema (what the pipeline records)
 scripts/manifest_logger.py            Validate, approve, log, budget report, archive script
-scripts/download_assets.sh            Generated helper script to download hosted assets
-examples/kente-volt/                  Demo campaign: brief.json + shot_manifest.json
+examples/eclipse-ronin/                Demo campaign: brief.json + shot_manifest.json
 assets/                               Local archive of rendered files (git-ignored by default; see below)
-
 ```
 
 ## Credit-gating design rationale
@@ -56,29 +53,29 @@ on model and resolution. A pipeline that picks a model silently can burn a whole
 
 The design choices that follow from that:
 
-* **Price first, from the platform.** Cost comes from Higgsfield's estimate tools, never from the model's
-memory. Quotes return a `quote_ref`, and the render is submitted with that ref so what is paid for is
-exactly what was approved.
-* **Approval is a literal token.** `APPROVE` cannot be confused with casual agreement, and it is scoped
-to the rows in the table shown. Any change to the request requires a new quote and a new approval.
-* **Gates are enforced in code too.** `manifest_logger.py approve` refuses rows with no estimate, refuses a
-video whose anchor is not completed and approved, and refuses approvals that would exceed the cap.
-`validate` flags any manifest row that is rendered without approval.
-* **Anchor before motion.** Still images are the cheapest asset, so identity is settled there. Video models
-then animate a fixed image instead of reinventing the product each time, which also removes the most
-common reason to pay for a re-render.
-* **Failures are not retried blindly.** After a timeout the outcome is unknown; the skill checks the balance
-and job list before anything is resubmitted.
+- **Price first, from the platform.** Cost comes from Higgsfield's estimate tools, never from the model's
+  memory. Quotes return a `quote_ref`, and the render is submitted with that ref so what is paid for is
+  exactly what was approved.
+- **Approval is a literal token.** `APPROVE` cannot be confused with casual agreement, and it is scoped
+  to the rows in the table shown. Any change to the request requires a new quote and a new approval.
+- **Gates are enforced in code too.** `manifest_logger.py approve` refuses rows with no estimate, refuses a
+  video whose anchor is not completed and approved, and refuses approvals that would exceed the cap.
+  `validate` flags any manifest row that is rendered without approval.
+- **Anchor before motion.** Still images are the cheapest asset, so identity is settled there. Video models
+  then animate a fixed image instead of reinventing the product each time, which also removes the most
+  common reason to pay for a re-render.
+- **Failures are not retried blindly.** After a timeout the outcome is unknown; the skill checks the balance
+  and job list before anything is resubmitted.
 
 ## Setup
 
 ### 1. Connect Higgsfield MCP
 
-* **Claude (web, desktop, mobile):** add Higgsfield from the connectors directory, or add the custom
-connector URL `https://mcp.higgsfield.ai/mcp` under Settings -> Connectors, then sign in to your
-Higgsfield account.
-* **Claude Code:** `claude mcp add --transport http higgsfield https://mcp.higgsfield.ai/mcp`, then
-authenticate when prompted (check `claude mcp --help` if flags change between versions).
+- **Claude (web, desktop, mobile):** add Higgsfield from the connectors directory, or add the custom
+  connector URL `https://mcp.higgsfield.ai/mcp` under Settings -> Connectors, then sign in to your
+  Higgsfield account.
+- **Claude Code:** `claude mcp add --transport http higgsfield https://mcp.higgsfield.ai/mcp`, then
+  authenticate when prompted (check `claude mcp --help` if flags change between versions).
 
 ### 2. Install the skill
 
@@ -87,83 +84,68 @@ automatically. In other Claude surfaces, upload the `ad-director` folder as a sk
 
 ### 3. Python tooling (optional but recommended)
 
-On Windows (Command Prompt / PowerShell):
-
-```cmd
-python -m venv .venv
-.venv\Scripts\activate
-pip install jsonschema
-
-```
-
-On macOS / Linux:
-
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install jsonschema        # full schema validation; the script degrades gracefully without it
-
 ```
 
 ## Usage
 
-Run from the repository root (`python` works directly on Windows; use `python3` on macOS/Linux if needed):
-
-```cmd
+```bash
 # Validate the example manifest (schema + credit-gate + anchor-first rules)
-python scripts\manifest_logger.py validate --manifest examples\kente-volt\shot_manifest.json --schema schemas\shot_manifest.schema.json
+python scripts/manifest_logger.py validate --manifest examples/eclipse-ronin/shot_manifest.json
 
 # Budget report: spent vs cap
-python scripts\manifest_logger.py report --manifest examples\kente-volt\shot_manifest.json --schema schemas\shot_manifest.schema.json
+python scripts/manifest_logger.py report --manifest examples/eclipse-ronin/shot_manifest.json
 
 # After the user replies APPROVE for a row
-python scripts\manifest_logger.py approve --manifest examples\kente-volt\shot_manifest.json --shot-id asset_0_anchor
+python scripts/manifest_logger.py approve --manifest examples/eclipse-ronin/shot_manifest.json --shot-id asset_0_anchor
 
 # After the render finishes
-python scripts\manifest_logger.py log --manifest examples\kente-volt\shot_manifest.json --shot-id asset_0_anchor --status completed --job-id <JOB_ID> --hosted-url <HTTPS_URL> --balance-before 10 --balance-after 10
+python scripts/manifest_logger.py log --manifest examples/eclipse-ronin/shot_manifest.json \
+  --shot-id asset_0_anchor --status completed --job-id <JOB_ID> --hosted-url <HTTPS_URL> \
+  --balance-before 10 --balance-after 9.25
 
 # Archive hosted assets locally
-python scripts\manifest_logger.py download --manifest examples\kente-volt\shot_manifest.json --output scripts\download_assets.sh --write-local-paths
-
+python scripts/manifest_logger.py download --manifest examples/eclipse-ronin/shot_manifest.json \
+  --output download_assets.sh --write-local-paths
+bash download_assets.sh
 ```
 
-Then ask Claude: *"Use the ad-director skill to run `examples/kente-volt/brief.json`."*
+Then ask Claude: *"Use the ad-director skill to run `examples/eclipse-ronin/brief.json`."*
 
 Exit codes: `0` ok, `1` validation errors, `2` over budget.
 
 Note: in the claude.ai chat, Claude works in a sandbox and cannot write directly to your local folder. It
-hands you the files, and you run the download script yourself. In Claude Code it can edit the repo directly.
+hands you the files, and you run `download_assets.sh` yourself. In Claude Code it can edit the repo directly.
 
-## Demo campaign: VOLT-KENTE X1
+## Demo campaign: ECLIPSE RONIN
 
-A 9:16 vertical ad concept for a matte-black studio headphone with woven gold-and-emerald accents,
-capped at 10 credits. In our test run, `asset_0_anchor` rendered at `1k` / `9:16` (`gpt_image_2_6`,
-medium quality) under a `free unlimited` allowance for `0` actual credits, while three video shots
-(`shot_1_orbit`, `shot_2_detail`, `shot_3_payoff`) were queued in the manifest as estimated.
+A 9:16 dark-fantasy anime teaser: one locked anchor image (lone swordsman on a rainy midnight rooftop)
+and three 5-second shots (push-in, detail pan, crane pull-back), capped at 10 credits.
 
-### Pre-render quotes (Higgsfield estimate tools, nothing rendered yet)
+### Pre-render quotes (Higgsfield estimate tools)
 
-| Row | Model | Res / AR | Duration | Estimated credits |
-| --- | --- | --- | --- | --- |
-| Anchor image | `nano_banana` | default / 9:16 | n/a | 1 |
-| Anchor image | `gpt_image_2_6` (quality low) | 1k / 9:16 | n/a | 0.75 |
-| Video shot 1 | `seedance_2_5` draft, text-to-video quote | 480p / 9:16 | 5 s | 15 |
-| Video shot 1 | `kling_4_0_flash` | 720p / 9:16 | 5 s | 7.5 |
-| Video shot 1 | `seedance_2_0_mini` | 480p / 9:16 | 5 s | 2.5 |
-| Video shot 1 | `seedance_2_0_mini` | 720p / 9:16 | 5 s | 5 |
+| Row | Model | Res / AR | Duration | Credits if paid | Free unlimited? |
+|-----|-------|----------|----------|-----------------|-----------------|
+| Anchor image | `gpt_image_2_6` (medium) | 1k / 9:16 | n/a | 1 | Yes |
+| Anchor image | `soul_cinematic` | n/a | n/a | not quoted | No |
+| Video shot (x3) | `seedance_2_5` omni_reference | 720p / 9:16 | 5 s | 35 each | Yes |
+| Video shot (x3) | `seedance_2_0_mini` | 480p / 9:16 | 5 s | 2.5 each | No |
 
-Video quotes were taken before the anchor existed, so they must be re-quoted with the anchor attached.
+Video quotes are provisional until the locked anchor is attached.
 
 ### Benchmark (fill in after the run)
 
 | Metric | Estimate | Actual |
-| --- | --- | --- |
-| Anchor image credits | 1 | 0 (free unlimited) |
-| Video shot credits | 7.5 (3x 2.5 mini @ 480p) | *TBD* |
-| Total credits vs 10-credit cap | 7.5 / 10 | 0 spent so far |
-| Anchor generation time | n/a | *TBD* |
-| Video generation time | n/a | *TBD* |
-| Anchor re-rolls needed | n/a | 0 |
-| Identity drift (1-5, human rating) | n/a | *TBD* |
+|--------|----------|--------|
+| Anchor image credits | _TBD_ | _TBD_ |
+| Video shot credits | _TBD_ | _TBD_ |
+| Total credits vs 10-credit cap | _TBD_ | _TBD_ |
+| Anchor generation time | n/a | _TBD_ |
+| Video generation time | n/a | _TBD_ |
+| Anchor re-rolls needed | n/a | _TBD_ |
+| Identity drift (1-5, human rating) | n/a | _TBD_ |
 
 ## Archiving and git
 

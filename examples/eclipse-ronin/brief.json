@@ -1,0 +1,97 @@
+{
+  "campaign_id": "eclipse-ronin",
+  "brand": "ECLIPSE RONIN",
+  "product": {
+    "name": "ECLIPSE RONIN",
+    "description": "Cinematic dark-fantasy anime teaser sequence (9:16) following a lone swordsman on a midnight rooftop.",
+    "identity_locks": [
+      "lone swordsman in a dark high-collar coat",
+      "katana hilt with cyan moonlight highlight",
+      "rain-slicked obsidian rooftop edge over a misty midnight skyline",
+      "cel-shaded anime style with cyan and crimson rim light",
+      "no text or logos"
+    ]
+  },
+  "audience": {
+    "segments": [
+      "dark-fantasy anime fans",
+      "short-form teaser viewers on Reels and Shorts"
+    ]
+  },
+  "tone": {
+    "vibe": "High-contrast cel-shaded anime cinematography, moody, cinematic, atmospheric",
+    "lighting": "Subtle cyan and crimson rim lighting, deep shadows",
+    "camera": "Slow, deliberate cinematic moves: push-in, pan, crane pull-back",
+    "palette": [
+      "obsidian black",
+      "cyan",
+      "crimson",
+      "mist grey"
+    ]
+  },
+  "aspect_ratio": "9:16",
+  "budget": {
+    "cap_credits": 10,
+    "reserve_credits": 0
+  },
+  "constraints": {
+    "silent_video": true,
+    "no_text_in_frame": true,
+    "avoid": [
+      "generic text overlays",
+      "extra characters",
+      "bright daylight",
+      "style drift away from cel-shading"
+    ]
+  },
+  "anchor": {
+    "shot_id": "asset_0_anchor",
+    "prompt": "Cinematic dark-fantasy anime key frame, high-contrast cel-shaded style. A lone swordsman in a dark high-collar coat stands at the edge of a rain-drenched obsidian rooftop at midnight, overlooking a misty skyline. His katana hilt catches subtle cyan moonlight, with faint crimson rim light on the coat's edge. Dramatic low-angle composition, deep shadows, rain streaks, atmospheric mist, vertical 9:16 framing, character fully in frame, no text, no logos, no watermark.",
+    "model_candidates": [
+      "gpt_image_2_6"
+    ],
+    "resolution": "1k",
+    "quality": "medium"
+  },
+  "shots": [
+    {
+      "shot_id": "shot_1_pushin",
+      "type": "video",
+      "duration_seconds": 5,
+      "camera_motion": "slow cinematic push-in",
+      "prompt": "Slow cinematic push-in toward the swordsman's silhouette on the rooftop edge. Rain streaks fall steadily and the coat fabric ripples in the wind. High-contrast cel-shaded dark-fantasy anime, deep shadows, rain-slicked obsidian rooftop at midnight, subtle cyan and crimson rim lighting, atmospheric mist. Keep the swordsman's design, dark high-collar coat, katana and rooftop identical to the reference frame. No text, no overlays.",
+      "model_candidates": [
+        "seedance_2_5",
+        "seedance_2_0",
+        "seedance_2_0_mini"
+      ],
+      "resolution": "720p"
+    },
+    {
+      "shot_id": "shot_2_detail",
+      "type": "video",
+      "duration_seconds": 5,
+      "camera_motion": "tight medium pan",
+      "prompt": "Tight medium pan across the rain-beaded katana hilt, then along the glowing cyan rim light on the character's shoulder. Shallow depth of field, water droplets catching light. High-contrast cel-shaded dark-fantasy anime, deep shadows, rain-slicked obsidian rooftop at midnight, subtle cyan and crimson rim lighting, atmospheric mist. Keep the swordsman's design, dark high-collar coat, katana and rooftop identical to the reference frame. No text, no overlays.",
+      "model_candidates": [
+        "seedance_2_5",
+        "seedance_2_0",
+        "seedance_2_0_mini"
+      ],
+      "resolution": "720p"
+    },
+    {
+      "shot_id": "shot_3_payoff",
+      "type": "video",
+      "duration_seconds": 5,
+      "camera_motion": "smooth crane pull-back",
+      "prompt": "Smooth crane pull-back rising and away from the rooftop edge, revealing the full midnight skyline and drifting mist around the lone swordsman. High-contrast cel-shaded dark-fantasy anime, deep shadows, rain-slicked obsidian rooftop at midnight, subtle cyan and crimson rim lighting, atmospheric mist. Keep the swordsman's design, dark high-collar coat, katana and rooftop identical to the reference frame. No text, no overlays.",
+      "model_candidates": [
+        "seedance_2_5",
+        "seedance_2_0",
+        "seedance_2_0_mini"
+      ],
+      "resolution": "720p"
+    }
+  ]
+}
